@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Quiz List</h1>
+    <table class="table table-striped table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th style="width: 8%;">Title</th>
+                <th>Description</th>
+                <th>Total Marks</th>
+                <th>Time Limit</th>  <!-- Column header updated -->
+                <th class="text-center">Questions</th>
+                <th class="text-center">Actions</th>
+                <th class="text-center">Take Quiz</th>
+                <th class="text-center">Result</th>
+                <th class="text-center">Import</th>
+                <th class="text-center">Export</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for quiz in quizzes %}
+            <tr>
+                <td class="font-weight-bold">{{ quiz.quiz_title }}</td>
+                <td>{{ quiz.quiz_description }}</td>
+                <td>{{ quiz.total_marks }}</td>
+                <td>{{ quiz.time_limit }} minutes</td>  <!-- Displaying Time Limit with 'minutes' -->
+                <td class="text-center">
+                    <a href="{% url 'quiz:quiz_question_list' quiz.id %}" class="btn btn-info btn-sm">
+                        <i class="fas fa-question-circle"></i> Add Question
+                    </a>
+                </td>
+                <td class="text-center">
+                    <a href="{% url 'quiz:quiz_edit' quiz.id %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <form method="POST" action="{% url 'quiz:quiz_delete' quiz.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this quiz?');">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </form>
+                </td>
+                <td class="text-center">
+                    <a href="{% url 'quiz:take_quiz' quiz.id %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-play"></i> Take Quiz
+                    </a>
+                </td>
+                <td class="text-center">
+                    {% if quiz.studentquizattempt_set.count > 0 %}
+                        {% with last_attempt=quiz.studentquizattempt_set.last %}
+                            <a href="{% url 'quiz:quiz_result' quiz.id last_attempt.id %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-chart-bar"></i> Result
+                            </a>
+                        {% endwith %}
+                    {% else %}
+                        <span class="text-muted">No Attempts</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{% url 'quiz:import_quiz' quiz.id %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-upload"></i> Import
+                    </a>
+                </td>
+                <td class="text-center">
+                    <a href="{% url 'quiz:export_quiz' quiz.id %}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-download"></i> Export
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="text-center">No quizzes available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="text-right">
+        <a href="{% url 'quiz:quiz_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Quiz
+        </a>
+    </div>
+</div>
+{% endblock %}
